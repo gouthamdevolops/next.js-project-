@@ -1,4 +1,5 @@
 import postgres from 'postgres';
+
 import {
   CustomerField,
   CustomersTableType,
@@ -33,11 +34,17 @@ export async function fetchRevenue() {
 export async function fetchLatestInvoices() {
   try {
     const data = await sql<LatestInvoiceRaw[]>`
-      SELECT invoices.amount, customers.name, customers.image_url, customers.email, invoices.id
-      FROM invoices
-      JOIN customers ON invoices.customer_id = customers.id
-      ORDER BY invoices.date DESC
-      LIMIT 5`;
+      SELECT i.amount, c.name, c.image_url, c.email, i.id
+      FROM invoices i
+      JOIN customers c ON i.customer_id = c.id
+      WHERE i.id IN (
+        SELECT DISTINCT ON (customer_id) id
+        FROM invoices
+        ORDER BY customer_id, date DESC
+      )
+      ORDER BY i.date DESC
+      LIMIT 5;
+    `;
 
     const latestInvoices = data.map((invoice) => ({
       ...invoice,
