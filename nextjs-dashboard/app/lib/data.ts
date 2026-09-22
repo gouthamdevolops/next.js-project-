@@ -9,20 +9,21 @@ import {
   Revenue,
 } from './definitions';
 import { formatCurrency } from './utils';
-
+// this allows me to query my database 
 const sql = postgres(process.env.POSTGRES_URL!, { ssl: 'require' });
 
 export async function fetchRevenue() {
   try {
     // Artificially delay a response for demo purposes.
     // Don't do this in production :)
-
-    // console.log('Fetching revenue data...');
-    // await new Promise((resolve) => setTimeout(resolve, 3000));
+// here we simulate a delay of time to fetch the from the database to show the loading state in the ui
+    console.log('..Fetching the revebue data..');
+    await new Promise((resolve) => setTimeout(resolve, 1000));
 
     const data = await sql<Revenue[]>`SELECT * FROM revenue`;
+// here is the 3 sec delay to simulate the loading state in the ui 
 
-    // console.log('Data fetch completed after 3 seconds.');
+    console.log('Data fetch completed after 1 seconds.');
 
     return data;
   } catch (error) {
@@ -68,7 +69,7 @@ export async function fetchCardData() {
          SUM(CASE WHEN status = 'paid' THEN amount ELSE 0 END) AS "paid",
          SUM(CASE WHEN status = 'pending' THEN amount ELSE 0 END) AS "pending"
          FROM invoices`;
-
+// this allows me to  fetch data in Parallel .
     const data = await Promise.all([
       invoiceCountPromise,
       customerCountPromise,
